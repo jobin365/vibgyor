@@ -13,6 +13,7 @@ export default function Block(props) {
       bid={props.index}
       onMouseOver={props.onMouseOver}
       onMouseUp={props.onMouseUp}
+      onTouchEnd={props.onTouchEnd}
       />
   );
 }

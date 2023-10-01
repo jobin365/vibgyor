@@ -92,7 +92,21 @@ export default function Grid(props) {
     newPositionCoordinates.current.x = movingBlockInitialCoordinates.current.x;
     newPositionCoordinates.current.y = movingBlockInitialCoordinates.current.y;
   }
-  console.log('RENDER')
+
+  const touchStart = useRef(false);
+  
+  function handleTouchStart(bid){
+    let id = bid;
+    let position = blocks.current.indexOf(parseInt(id));
+    //Old position means the position from which the dragging started
+    oldPositionSave.current = position;
+    movingBlockInitialCoordinates.current =
+      initialCoordinates.current[position];
+    //When dragging is about to start, we want newPositionCoordinates to be same as the current coordinates.
+    newPositionCoordinates.current.x = movingBlockInitialCoordinates.current.x;
+    newPositionCoordinates.current.y = movingBlockInitialCoordinates.current.y;
+    touchStart.current = true;
+  }
 
   function handleMouseUp(event) {
     //We are doing the exact same thing as handleMouseOver here, because a user can drag same block after releasing it. When doing so onMouseOver doesn't get called.
@@ -107,6 +121,22 @@ export default function Grid(props) {
     newPositionCoordinates.current.x = movingBlockInitialCoordinates.current.x;
     newPositionCoordinates.current.y = movingBlockInitialCoordinates.current.y;
     props.setVibgyor(checkIfSorted(blocks.current));
+  }
+
+  function handleTouchEnd(event){
+    //We are doing the exact same thing as handleMouseOver here, because a user can drag same block after releasing it. When doing so onMouseOver doesn't get called.
+    //One extra thing we do here is we check if the order of blocks is correct. If it is, then we display the Success Kid image.
+    let id = event.currentTarget.getAttribute("bid");
+    let position = blocks.current.indexOf(parseInt(id));
+    //Old position means the position from which the dragging started
+    oldPositionSave.current = position;
+    movingBlockInitialCoordinates.current =
+      initialCoordinates.current[position];
+    //When dragging is about to start, we want newPositionCoordinates to be same as the current coordinates.
+    newPositionCoordinates.current.x = movingBlockInitialCoordinates.current.x;
+    newPositionCoordinates.current.y = movingBlockInitialCoordinates.current.y;
+    props.setVibgyor(checkIfSorted(blocks.current));
+    touchStart.current = false;
   }
 
   const [springs, api] = useSprings(totalBlocks, (index) =>
@@ -127,6 +157,10 @@ export default function Grid(props) {
   const bind = useDrag(
     ({ args: [draggingBlockIndex], down, movement: [mx, my] }) => {
       api.start((index) => {
+        if ("ontouchstart" in document.documentElement && index === draggingBlockIndex){
+          if (touchStart.current === false)
+            handleTouchStart(draggingBlockIndex);
+        }
         // We are only calculating new positions for the block that is being dragged
         if (down && index === draggingBlockIndex) {
           const oldPosition = blocks.current.indexOf(draggingBlockIndex);
@@ -161,6 +195,8 @@ export default function Grid(props) {
               initialCoordinates.current[newPosition].x;
             newPositionCoordinates.current.y =
               initialCoordinates.current[newPosition].y;
+            
+            
 
             let newOrder = [...blocks.current];
             // swaping
@@ -210,6 +246,7 @@ export default function Grid(props) {
           index={index}
           onMouseOver={handleMouseOver}
           onMouseUp={handleMouseUp}
+          onTouchEnd={handleTouchEnd}
         />
       ))}
     </div>
