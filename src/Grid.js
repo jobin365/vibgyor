@@ -56,7 +56,7 @@ export default function Grid(props) {
   const getBlockCoordinates = (index) => {
     const col = Math.floor(index % blockInRow);
     const row = Math.floor(index / blockInRow);
-    return { x: col * 50 + col * 15, y: 50 * row + row * 15 };
+    return { x: col * 50 + col * 15, y: 50 * row + row * 15 , scale: 1, zIndex : 1};
   };
 
   const totalBlocks = props.noOfBlocks;
